@@ -129,9 +129,5 @@ Learned how to securely manage Docker Hub credentials, access environment variab
 - Understanding secret masking.
 - Integrating Docker Hub authentication with GitHub Actions.
 
-## Author
 
-**Sharmila Medapati**
-
-DevOps Learning – Day 1
 
