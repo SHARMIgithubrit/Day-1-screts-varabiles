@@ -40,10 +40,9 @@ jobs:
 
       # Step 6: Verify build files
       - name: Display Build Files
-        working-directory: Day-3
         run: |
           echo "Build artifact content:"
-          ls -la dist/
+          ls -la Day-3/dist/
 
       # Step 7: Upload artifact
       - name: Upload Build Artifact
@@ -76,9 +75,39 @@ jobs:
       - name: Display Build Content
         run: cat downloaded-build/app.js
 
-      # Step 11: Deployment simulation
-      - name: Deploy Artifact
+  deploy:
+    runs-on: ubuntu-latest
+    needs: download
+
+    steps:
+      # Step 11: Checkout code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 12: Download build artifact
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: nodejs-build
+          path: deploy/
+
+      # Step 13: Install and configure Nginx
+      - name: Setup Nginx
         run: |
-          echo "Deploying Node.js build artifact..."
-          ls -la downloaded-build/
-          echo "Deployment completed successfully."
+          sudo apt-get update
+          sudo apt-get install -y nginx
+
+      # Step 14: Deploy application files
+      - name: Deploy Application
+        run: |
+          sudo rm -rf /var/www/html/*
+          sudo cp -r deploy/* /var/www/html/
+          sudo systemctl start nginx
+          sudo systemctl status nginx --no-pager
+
+      # Step 15: Verify deployment
+      - name: Verify Deployment
+        run: |
+          echo "Checking deployed application..."
+          curl --fail http://localhost/
+          echo "Deployment completed successfully!"
