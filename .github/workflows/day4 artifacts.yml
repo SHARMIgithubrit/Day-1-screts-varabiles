@@ -43,6 +43,7 @@ jobs:
           with:
             name: nodejs-build    
             path: coverage 
+            if-no-files-found: error
             retention-days: 7
     # job2
     # JOB 2: DOWNLOAD AND DEPLOY
