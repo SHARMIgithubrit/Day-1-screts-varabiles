@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
 
       # Step 3: Install dependencies
       - name: Install Dependencies
@@ -110,3 +110,4 @@ jobs:
         run: |
           echo "Checking deployed application..."
           echo "Deployment completed successfully!"
+
