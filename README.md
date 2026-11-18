@@ -87,7 +87,7 @@ Uploaded build files as artifacts.
 Learning Outcome
 Implemented an automated Node.js CI pipeline with dependency installation, npm caching, linting, unit testing, application building, and artifact uploading.
 Repository Structure
-pipelines/
+pipeline/
 │
 ├── .github/
 │   └── workflows/
@@ -97,4 +97,5 @@ pipelines/
 │
 └── README.md
 Note: Update the workflow filenames above according to the actual files available in your repository.
+
  
