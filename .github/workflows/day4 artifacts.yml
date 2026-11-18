@@ -42,7 +42,7 @@ jobs:
           uses: actions/upload-artifact@v4
           with:
             name: nodejs-build    
-            path: Day-3/build
+            path: coverage
             retention-days: 7
     # job2
     # JOB 2: DOWNLOAD AND DEPLOY
@@ -56,19 +56,4 @@ jobs:
           uses: actions/download-artifact@v4
           with:
             name: nodejs-build
-            path: deployment-package/
-
-        - name: Verify Artifact
-          run: ls -la deployment-package/
-
-        - name: Prepare Deployment
-          run: |
-            mkdir -p deployment
-            cp -r deployment-package/. deployment/
-            echo "Artifact is ready for deployment"
-
-        - name: Deployment Verification
-          run: |
-            echo "Deployment package contents:"
-            ls -la deployment/
-
+            path: coverage
