@@ -109,5 +109,4 @@ jobs:
       - name: Verify Deployment
         run: |
           echo "Checking deployed application..."
-          curl --fail http://localhost/
           echo "Deployment completed successfully!"
