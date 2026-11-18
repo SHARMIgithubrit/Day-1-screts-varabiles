@@ -1,30 +1,23 @@
 
-name: Artifacts CI Pipeline
+name: Day 04 Artifacts
 
 on:
+  workflow_dispatch:
+
   push:
     branches:
       - main
-
-  workflow_dispatch:
-
-permissions:
-  contents: write
 
 jobs:
 
   # JOB 1: BUILD AND UPLOAD ARTIFACTS
   build:
-    name: Build and Upload
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: Day-3
-
     steps:
-      # Step 1: Checkout code
-      - name: Checkout Code
+
+      # Step 1: Checkout the code
+      - name: Checkout the code
         uses: actions/checkout@v4
 
       # Step 2: Setup Node.js
@@ -36,69 +29,88 @@ jobs:
           cache-dependency-path: Day-3/package-lock.json
 
       # Step 3: Install dependencies
-      - name: Install Dependencies
+      - name: Install dependencies
+        working-directory: Day-3
         run: npm ci
 
-      # Step 4: Run linting
-      - name: Run Lint
+      # Step 4: Run lint
+      - name: Run lint
+        working-directory: Day-3
         run: npm run lint
 
       # Step 5: Run tests with coverage
-      - name: Run Tests with Coverage
+      - name: Run tests with coverage
+        working-directory: Day-3
         run: npm run test:coverage
 
-      # Step 6: Build application
-      - name: Build Application
+      # Step 6: Create build artifact
+      - name: Create build artifact
+        working-directory: Day-3
         run: npm run build
 
-      # Step 7: Upload build artifacts
-      - name: Upload Build Artifacts
+      # Step 7: Display build artifact
+      - name: Display build artifact
+        run: |
+          echo "Build artifact content:"
+          ls -la Day-3/dist/
+
+      # Step 8: Upload build artifact
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: nodejs-build
+          name: nodejs-build-artifact
           path: Day-3/dist/
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 5
 
-      # Step 8: Upload coverage reports
-      - name: Upload Coverage Reports
+      # Step 9: Upload coverage report
+      - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: nodejs-coverage
+          name: nodejs-coverage-report
           path: Day-3/coverage/
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 5
 
   # JOB 2: DOWNLOAD AND DEPLOY
   deploy:
-    name: Download and Deploy
     runs-on: ubuntu-latest
     needs: build
 
     steps:
+
       # Step 1: Download build artifact
-      - name: Download Build Artifact
+      - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: nodejs-build
-          path: deployment/dist/
+          name: nodejs-build-artifact
+          path: deploy/build/
 
-      # Step 2: Download coverage artifact
-      - name: Download Coverage Artifact
+      # Step 2: Download coverage report
+      - name: Download coverage report
         uses: actions/download-artifact@v4
         with:
-          name: nodejs-coverage
-          path: deployment/coverage/
+          name: nodejs-coverage-report
+          path: deploy/coverage/
 
-      # Step 3: Verify downloaded files
-      - name: Verify Artifacts
+      # Step 3: Verify downloaded artifacts
+      - name: Verify downloaded artifacts
         run: |
-          echo "Build files:"
-          ls -la deployment/dist/
+          echo "Downloaded build artifact:"
+          ls -la deploy/build/
 
-          echo "Coverage files:"
-          ls -la deployment/coverage/
+          echo "Downloaded coverage report:"
+          ls -la deploy/coverage/
 
-      # Step 4: Deployment preparation
-      - name: Deployment Preparation
-        run: echo "Build and coverage artifacts downloaded successfully"
+      # Step 4: Display build content
+      - name: Display build content
+        run: |
+          echo "Build artifact content:"
+          cat deploy/build/app.js
+
+      # Step 5: Deploy artifact
+      - name: Deploy artifact
+        run: |
+          echo "Preparing deployment..."
+          ls -la deploy/
+          echo "Deployment preparation completed."
