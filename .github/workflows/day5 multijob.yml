@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-
   workflow_dispatch:
 
 jobs:
@@ -77,21 +76,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Download Build Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: nodejs-build
-          path: Day-3/dist/
+      - name: Check Dockerfile Exists
+        run: ls -la Day-3/
 
       - name: Build Docker Image
-        run: |
-          docker build \
-            -f Day-3/Dockerfile \
-            -t nodejs-day5:latest \
-            Day-3
+        working-directory: Day-3
+        run: docker build -t nodejs-day5:latest .
 
       - name: Test Docker Image
-        run: docker run --rm nodejs-day5:latest
+        run: |
+          docker run -d --rm --name test-app -p 8080:80 nodejs-day5:latest
+          curl -f --retry 5 --retry-connrefused --retry-delay 1 http://localhost:8080
+          docker stop test-app
 
       - name: Save Docker Image
         run: docker save -o nodejs-image.tar nodejs-day5:latest
@@ -123,9 +119,10 @@ jobs:
       - name: Deploy Application
         run: |
           echo "Starting deployment..."
-          docker run --rm nodejs-day5:latest
+          docker run -d --rm --name app -p 8080:80 nodejs-day5:latest
+          curl -f --retry 5 --retry-connrefused --retry-delay 1 http://localhost:8080
+          docker stop app
           echo "Application container executed successfully."
 
       - name: Deployment Status
         run: echo "Deployment job completed successfully!"
-
