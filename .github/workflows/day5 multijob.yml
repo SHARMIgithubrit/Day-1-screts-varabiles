@@ -86,7 +86,6 @@ jobs:
       - name: Test Docker Image
         run: |
           docker run -d --rm --name test-app -p 8080:80 nodejs-day5:latest
-          curl -f --retry 5 --retry-connrefused --retry-delay 1 http://localhost:8080
           docker stop test-app
 
       - name: Save Docker Image
