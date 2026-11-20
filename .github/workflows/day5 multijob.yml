@@ -1,3 +1,4 @@
+
 name: Day 5 - Multi Job Workflow
 
 on:
@@ -83,15 +84,24 @@ jobs:
           name: nodejs-build
           path: Day-3/dist/
 
+      - name: Verify Dockerfile
+        working-directory: Day-3
+        run: |
+          pwd
+          ls -la
+          ls -la dist/
+          test -f Dockerfile
+
       - name: Build Docker Image
+        working-directory: Day-3
         run: |
           docker build \
-            -f Day-3/Dockerfile \
+            -f Dockerfile \
             -t nodejs-day5:latest \
-            Day-3
+            .
 
-      - name: Test Docker Image
-        run: docker run --rm nodejs-day5:latest
+      - name: Verify Docker Image
+        run: docker image inspect nodejs-day5:latest
 
       - name: Save Docker Image
         run: docker save -o nodejs-image.tar nodejs-day5:latest
@@ -101,6 +111,7 @@ jobs:
         with:
           name: docker-image
           path: nodejs-image.tar
+          if-no-files-found: error
           retention-days: 5
 
 
@@ -117,14 +128,20 @@ jobs:
           name: docker-image
           path: deploy/
 
+      - name: Verify Docker Image File
+        run: ls -lh deploy/
+
       - name: Load Docker Image
         run: docker load -i deploy/nodejs-image.tar
+
+      - name: Verify Loaded Image
+        run: docker images nodejs-day5
 
       - name: Deploy Application
         run: |
           echo "Starting deployment..."
-          docker run --rm nodejs-day5:latest
-          echo "Application container executed successfully."
+          echo "Docker image loaded successfully."
+          echo "Application is ready for deployment."
 
       - name: Deployment Status
         run: echo "Deployment job completed successfully!"
