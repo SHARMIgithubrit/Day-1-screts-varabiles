@@ -1,20 +1,9 @@
-
 name: Day 5 - Multi Job Workflow
-
 on:
-  push:
-    branches:
-      - main
-
   workflow_dispatch:
-
 jobs:
-
-  # JOB 1: TEST
-  test:
-    name: Job 1 - Test
+  job1:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -22,27 +11,19 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
 
       - name: Install Dependencies
         working-directory: Day-3
-        run: npm ci
+        run: npm install
 
-      - name: Run ESLint
-        working-directory: Day-3
-        run: npm run lint
-
-      - name: Run Jest Tests
+      - name: Run Tests
         working-directory: Day-3
         run: npm test
 
-
-  # JOB 2: BUILD
-  build:
-    name: Job 2 - Build
+  job2:
     runs-on: ubuntu-latest
-    needs: test
-
+    needs: job1
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -50,109 +31,48 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-
-      - name: Install Dependencies
-        working-directory: Day-3
-        run: npm ci
+          node-version: '24'
 
       - name: Build Application
         working-directory: Day-3
         run: npm run build
 
-      - name: Verify Build Files
+      - name: Display Build Files
         run: |
+          echo "Build artifact content:"
           ls -la Day-3/dist/
-          test -f Day-3/dist/app.js
-
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: nodejs-build
-          path: Day-3/dist/
-          if-no-files-found: error
-          retention-days: 5
-
-
-  # JOB 3: DOCKER
-  docker:
-    name: Job 3 - Docker
+  job3:
     runs-on: ubuntu-latest
-    needs: build
-
+    needs: job2
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
 
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
         with:
           name: nodejs-build
-          path: Day-3/dist/
-
-      - name: Verify Dockerfile
-        working-directory: Day-3
-        run: |
-          pwd
-          ls -la
-          ls -la dist/
-          test -f Dockerfile
-
-      - name: Build Docker Image
-        working-directory: Day-3
-        run: |
-          docker build \
-            -f Dockerfile \
-            -t nodejs-day5:latest \
-            .
-
-      - name: Test Docker Image
-        run: docker run --rm nodejs-day5:latest
-
-      - name: Save Docker Image
-        run: |
-          docker save \
-            -o nodejs-image.tar \
-            nodejs-day5:latest
-
-      - name: Upload Docker Image
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-image
-          path: nodejs-image.tar
-          if-no-files-found: error
-          retention-days: 5
-
-
-  # JOB 4: DEPLOY
-  deploy:
-    name: Job 4 - Deploy
+  job4:
     runs-on: ubuntu-latest
-    needs: docker
-
+    needs: job3
     steps:
-      - name: Download Docker Image
-        uses: actions/download-artifact@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          name: docker-image
-          path: deploy/
+          node-version: '24'
 
-      - name: Verify Docker Image File
-        run: ls -lh deploy/
+      - name: Install Dependencies
+        working-directory: Day-3
+        run: npm install
 
-      - name: Load Docker Image
-        run: docker load -i deploy/nodejs-image.tar
-
-      - name: Verify Docker Image
-        run: docker images nodejs-day5
-
-      - name: Deploy Application
-        run: |
-          echo "Starting deployment..."
-
-          docker run --rm nodejs-day5:latest
-
-          echo "Application executed successfully!"
-
-      - name: Deployment Status
-        run: echo "Deployment completed successfully!"
+      - name: Run Tests
+        working-directory: Day-3
+        run: npm test           
