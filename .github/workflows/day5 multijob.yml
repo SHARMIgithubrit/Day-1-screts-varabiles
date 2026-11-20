@@ -26,9 +26,13 @@ jobs:
 
       - name: Install Dependencies
         working-directory: Day-3
-        run: npm install
+        run: npm ci
 
-      - name: Run Tests
+      - name: Run ESLint
+        working-directory: Day-3
+        run: npm run lint
+
+      - name: Run Jest Tests
         working-directory: Day-3
         run: npm test
 
@@ -50,14 +54,16 @@ jobs:
 
       - name: Install Dependencies
         working-directory: Day-3
-        run: npm install
+        run: npm ci
 
       - name: Build Application
         working-directory: Day-3
         run: npm run build
 
-      - name: Display Build Files
-        run: ls -la Day-3/dist/
+      - name: Verify Build Files
+        run: |
+          ls -la Day-3/dist/
+          test -f Day-3/dist/app.js
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
@@ -100,11 +106,14 @@ jobs:
             -t nodejs-day5:latest \
             .
 
-      - name: Verify Docker Image
-        run: docker image inspect nodejs-day5:latest
+      - name: Test Docker Image
+        run: docker run --rm nodejs-day5:latest
 
       - name: Save Docker Image
-        run: docker save -o nodejs-image.tar nodejs-day5:latest
+        run: |
+          docker save \
+            -o nodejs-image.tar \
+            nodejs-day5:latest
 
       - name: Upload Docker Image
         uses: actions/upload-artifact@v4
@@ -134,14 +143,16 @@ jobs:
       - name: Load Docker Image
         run: docker load -i deploy/nodejs-image.tar
 
-      - name: Verify Loaded Image
+      - name: Verify Docker Image
         run: docker images nodejs-day5
 
       - name: Deploy Application
         run: |
           echo "Starting deployment..."
-          echo "Docker image loaded successfully."
-          echo "Application is ready for deployment."
+
+          docker run --rm nodejs-day5:latest
+
+          echo "Application executed successfully!"
 
       - name: Deployment Status
-        run: echo "Deployment job completed successfully!"
+        run: echo "Deployment completed successfully!"
