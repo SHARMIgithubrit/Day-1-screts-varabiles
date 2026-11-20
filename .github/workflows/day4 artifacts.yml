@@ -1,11 +1,6 @@
 
 name: Artifact Management Pipeline
-
 on:
-  push:
-    branches:
-      - main
-
   workflow_dispatch:
 
 jobs:
