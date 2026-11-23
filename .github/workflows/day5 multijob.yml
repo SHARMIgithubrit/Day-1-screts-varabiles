@@ -17,7 +17,7 @@ jobs:
  
     defaults:
       run:
-        working-directory: day 5
+        working-directory: Day-5
  
     steps:
       - name: Checkout Code
@@ -42,7 +42,7 @@ jobs:
  
     defaults:
       run:
-        working-directory: day 5
+        working-directory: Day-5
  
     steps:
       - name: Checkout Code
@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: day 5
+        working-directory: Day-5
  
     steps:
       - name: Checkout Code
